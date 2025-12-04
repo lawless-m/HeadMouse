@@ -234,7 +234,6 @@ def main():
     print("  Recalibrate:     opentrack-mouse calibrate")
     print()
     # Check if we're running interactively (has a terminal)
-    import sys
     if sys.stdin.isatty():
         input("Press ENTER to start mouse control...")
     print()
