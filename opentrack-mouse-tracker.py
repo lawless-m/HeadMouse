@@ -19,9 +19,11 @@ UDP_PORT = 5005
 
 # Control
 enabled = True
+recalibrate_requested = False
 
 # Calibration file
-CALIBRATION_FILE = '/tmp/opentrack_calibration.json'
+CONFIG_DIR = os.path.expanduser('~/.config/headmouse')
+CALIBRATION_FILE = os.path.join(CONFIG_DIR, 'calibration.json')
 
 def get_screen_size():
     """Get screen resolution"""
@@ -65,6 +67,9 @@ def collect_samples(sock, duration=2.0):
 def save_calibration(calibration):
     """Save calibration to file"""
     try:
+        # Create config directory if it doesn't exist
+        os.makedirs(CONFIG_DIR, exist_ok=True)
+
         with open(CALIBRATION_FILE, 'w') as f:
             json.dump(calibration, f)
         print(f"✓ Calibration saved to {CALIBRATION_FILE}")
@@ -182,11 +187,18 @@ def handle_sigusr1(signum, frame):
     status = "ENABLED" if enabled else "DISABLED"
     print(f"\nHead tracking: {status}")
 
-def main():
-    global enabled
+def handle_sigusr2(signum, frame):
+    """Recalibrate on SIGUSR2"""
+    global recalibrate_requested
+    recalibrate_requested = True
+    print(f"\nRecalibration requested...")
 
-    # Set up signal handler for toggling
+def main():
+    global enabled, recalibrate_requested
+
+    # Set up signal handlers
     signal.signal(signal.SIGUSR1, handle_sigusr1)
+    signal.signal(signal.SIGUSR2, handle_sigusr2)
 
     screen_width, screen_height = get_screen_size()
     print(f"Screen: {screen_width}x{screen_height}")
@@ -214,7 +226,8 @@ def main():
         f.write(str(os.getpid()))  # Write PID
 
     print("Control commands:")
-    print("  Toggle: opentrack-mouse toggle")
+    print("  Toggle tracking: opentrack-mouse toggle")
+    print("  Recalibrate:     opentrack-mouse calibrate")
     print()
     input("Press ENTER to start mouse control...")
     print()
@@ -226,6 +239,21 @@ def main():
     sock.settimeout(0.01)
     while True:
         try:
+            # Check if recalibration requested
+            if recalibrate_requested:
+                recalibrate_requested = False
+                print("\n" + "="*60)
+                print("RECALIBRATING...")
+                print("="*60 + "\n")
+                new_calibration = calibrate(sock)
+                if new_calibration:
+                    calibration = new_calibration
+                    print("\n✓ Recalibration complete! Resuming tracking...")
+                    print()
+                else:
+                    print("\n❌ Recalibration failed! Using old calibration...")
+                    print()
+
             data, addr = sock.recvfrom(48)
 
             if len(data) == 48:
