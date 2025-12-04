@@ -113,7 +113,11 @@ def calibrate(sock):
 
     for pos_name, instruction in steps:
         print(f"Step: {instruction}")
-        input("Press ENTER when ready, then hold your gaze for 2 seconds...")
+        if sys.stdin.isatty():
+            input("Press ENTER when ready, then hold your gaze for 2 seconds...")
+        else:
+            print("Starting in 3 seconds...")
+            time.sleep(3)
 
         samples = collect_samples(sock, duration=2.0)
 
@@ -229,7 +233,10 @@ def main():
     print("  Toggle tracking: opentrack-mouse toggle")
     print("  Recalibrate:     opentrack-mouse calibrate")
     print()
-    input("Press ENTER to start mouse control...")
+    # Check if we're running interactively (has a terminal)
+    import sys
+    if sys.stdin.isatty():
+        input("Press ENTER to start mouse control...")
     print()
     print("Running... Move your head to control the mouse!")
     print("Press Ctrl+C to exit")

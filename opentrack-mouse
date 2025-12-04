@@ -11,21 +11,33 @@ check_running() {
     return 1
 }
 
+start_tracker() {
+    echo "Starting head tracker..."
+    nohup opentrack-mouse-tracker > /dev/null 2>&1 &
+    sleep 2
+}
+
 case "$1" in
     toggle)
+        if ! check_running; then
+            start_tracker
+        fi
         if check_running; then
             PID=$(tail -1 /tmp/opentrack_mouse.pid)
             kill -SIGUSR1 $PID && echo "Toggled head tracking"
         else
-            echo "Head tracking not running. Start with: opentrack-mouse-tracker"
+            echo "Failed to start tracker"
         fi
         ;;
     calibrate)
+        if ! check_running; then
+            start_tracker
+        fi
         if check_running; then
             PID=$(tail -1 /tmp/opentrack_mouse.pid)
             kill -SIGUSR2 $PID && echo "Recalibration started..."
         else
-            echo "Head tracking not running. Start with: opentrack-mouse-tracker"
+            echo "Failed to start tracker"
         fi
         ;;
     status)
@@ -42,10 +54,8 @@ case "$1" in
         ;;
     *)
         echo "Usage: opentrack-mouse {toggle|calibrate|status}"
-        echo "  toggle     - Toggle head tracking on/off"
-        echo "  calibrate  - Trigger live recalibration (without restarting)"
+        echo "  toggle     - Toggle head tracking on/off (starts tracker if needed)"
+        echo "  calibrate  - Trigger live recalibration (starts tracker if needed)"
         echo "  status     - Check if tracker is running"
-        echo ""
-        echo "To start tracker: opentrack-mouse-tracker"
         ;;
 esac
