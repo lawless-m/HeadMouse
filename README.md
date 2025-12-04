@@ -1,13 +1,24 @@
-# OpenTrack Mouse Control
+# HeadMouse - OpenTrack Mouse Control
 
 Control your mouse cursor using head tracking via OpenTrack. Perfect for hands-free navigation in tiling window managers like i3wm.
 
 ## Features
 
 - **Calibrated head tracking** - Maps your natural head movement range to screen coordinates
-- **Persistent calibration** - Saves calibration between sessions
-- **Voice control ready** - Toggle tracking on/off via command line
+- **Persistent calibration** - Saves calibration between sessions (`~/.config/headmouse/`)
+- **Live recalibration** - Recalibrate without restarting the tracker
+- **Voice control ready** - Toggle and recalibrate via command line
 - **Focus-follows-mouse integration** - Works seamlessly with i3wm's focus-follows-mouse
+
+## Quick Start
+
+**Already have OpenTrack installed?** Skip to [Usage](#usage).
+
+**Fresh installation?** See **[INSTALLATION.md](INSTALLATION.md)** for complete setup guide including:
+- Building ONNX Runtime from source
+- Building OpenTrack with NeuralNet tracker support
+- Fixing common build issues (Eigen hash mismatch, etc.)
+- Complete OpenTrack configuration
 
 ## Requirements
 
@@ -16,7 +27,7 @@ Control your mouse cursor using head tracking via OpenTrack. Perfect for hands-f
 - xdotool
 - xdpyinfo
 
-## Installation
+## Quick Installation (OpenTrack already installed)
 
 ```bash
 # Install dependencies
