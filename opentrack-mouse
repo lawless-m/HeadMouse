@@ -1,0 +1,26 @@
+#!/bin/bash
+# Control script for opentrack mouse
+
+case "$1" in
+    toggle)
+        if [ -f /tmp/opentrack_mouse.pid ]; then
+            PID=$(tail -1 /tmp/opentrack_mouse.pid)
+            kill -SIGUSR1 $PID 2>/dev/null && echo "Toggled head tracking" || echo "Head tracking not running"
+        else
+            echo "Head tracking not running"
+        fi
+        ;;
+    calibrate)
+        if [ -f /tmp/opentrack_calibration.json ]; then
+            rm /tmp/opentrack_calibration.json
+            echo "Calibration file deleted. Restart the tracker to recalibrate."
+        else
+            echo "No calibration file found."
+        fi
+        ;;
+    *)
+        echo "Usage: opentrack-mouse {toggle|calibrate}"
+        echo "  toggle     - Toggle head tracking on/off"
+        echo "  calibrate  - Delete saved calibration (will recalibrate on next start)"
+        ;;
+esac
