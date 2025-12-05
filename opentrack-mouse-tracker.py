@@ -204,6 +204,15 @@ def main():
     signal.signal(signal.SIGUSR1, handle_sigusr1)
     signal.signal(signal.SIGUSR2, handle_sigusr2)
 
+    # Check if OpenTrack is running, start it if not
+    try:
+        subprocess.run(['pgrep', '-x', 'opentrack'], check=True, capture_output=True)
+        print("OpenTrack is already running")
+    except subprocess.CalledProcessError:
+        print("Starting OpenTrack...")
+        subprocess.Popen(['start-opentrack'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        time.sleep(3)  # Wait for OpenTrack to start
+
     screen_width, screen_height = get_screen_size()
     print(f"Screen: {screen_width}x{screen_height}")
     print()
